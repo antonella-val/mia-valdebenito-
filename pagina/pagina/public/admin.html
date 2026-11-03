@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | MC TECH</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="img/logo.png" alt="MC TECH">
+      <span>MC TECH — Panel</span>
+    </div>
+  </header>
+
+  <section style="max-width:450px;margin-top:4rem;">
+    <h2>Acceso Administrador</h2>
+    <form id="form-login">
+      <label>Usuario</label>
+      <input type="text" id="usuario" required autocomplete="username">
+
+      <label>Contraseña</label>
+      <input type="password" id="password" required autocomplete="current-password">
+
+      <button type="submit" class="btn">Ingresar</button>
+      <p id="estado" class="mensaje-estado"></p>
+    </form>
+    <p style="text-align:center;margin-top:1rem;">
+      <a href="index.html" style="color:var(--azul-fuerte)">← Volver al sitio</a>
+    </p>
+  </section>
+
+  <script>
+    const form = document.getElementById('form-login');
+    const estado = document.getElementById('estado');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      estado.textContent = '';
+      estado.className = 'mensaje-estado';
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            usuario:  document.getElementById('usuario').value.trim(),
+            password: document.getElementById('password').value
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error');
+        localStorage.setItem('mc_token', data.token);
+        window.location.href = 'panel.html';
+      } catch (err) {
+        estado.textContent = '❌ ' + err.message;
+        estado.className = 'mensaje-estado err';
+      }
+    });
+  </script>
+</body>
+</html>

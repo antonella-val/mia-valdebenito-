@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MC TECH | Soluciones Informáticas</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="img/logo.png" alt="MC TECH">
+      <span>MC TECH</span>
+    </div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="nosotros.html">Nosotros</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+      <a href="admin.html"><i class="fa-solid fa-lock"></i> Admin</a>
+    </nav>
+  </header>
+
+  <!-- PORTADA -->
+  <section class="hero">
+    <div class="hero-text">
+      <span class="hero-badge">PROBLEMAS TECNOLÓGICOS, SOLUCIONES CONFIABLES</span>
+      <h1>Tecnología que impulsa tu empresa</h1>
+      <p>En MC TECH brindamos soluciones informáticas integrales: reparación, redes, soporte y desarrollo web con la calidad que tu negocio merece.</p>
+      <div class="hero-botones">
+        <a href="contacto.html" class="btn-primario">Solicitar diagnóstico</a>
+        <a href="servicios.html" class="btn-secundario">Ver servicios</a>
+      </div>
+    </div>
+    <!-- Sacamos el logo gigante de acá, igual que en tu imagen -->
+  </section>
+
+  <!-- POR QUÉ ELEGIRNOS -->
+  <section>
+    <h2>¿Por qué elegirnos?</h2>
+    <div class="grid-servicios">
+      <div class="card-servicio">
+        <div class="icono-caja"><i class="fa-solid fa-bolt"></i></div>
+        <h3>Rápidos</h3>
+        <p>Diagnóstico y respuesta en menos de 24 horas.</p>
+      </div>
+      <div class="card-servicio">
+        <div class="icono-caja"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>Confiables</h3>
+        <p>Más de 5 años de experiencia en el rubro IT.</p>
+      </div>
+      <div class="card-servicio">
+        <div class="icono-caja"><i class="fa-solid fa-heart"></i></div>
+        <h3>Cercanos</h3>
+        <p>Atención personalizada y seguimiento post-servicio.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN DE SERVICIOS (Traídos de la Base de Datos) -->
+  <section class="seccion-servicios">
+    <h2>Nuestros servicios</h2>
+    <p class="subtitulo">Todo lo que tu negocio necesita en un solo lugar.</p>
+    <div id="lista-servicios" class="grid-servicios">
+      <p>Cargando servicios...</p>
+    </div>
+  </section>
+
+  <!-- FORMULARIO BANNER -->
+  <section>
+    <div class="contacto-banner">
+      <div class="contacto-info">
+        <h2>Hablemos de tu proyecto</h2>
+        <p>Contanos qué problema tecnológico tenés y te respondemos en menos de 24 horas.</p>
+      </div>
+      <form id="form-consulta-portada">
+        <input type="text" id="nombre" placeholder="Nombre" required minlength="3">
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+        <textarea id="mensaje" placeholder="¿En qué podemos ayudarte?" required minlength="10"></textarea>
+        <!-- Campos ocultos para que la base de datos reciba todo -->
+        <input type="hidden" id="asunto" value="Consulta desde la portada">
+        <input type="hidden" id="telefono" value="">
+        
+        <button type="submit" class="btn">Enviar mensaje</button>
+        <p id="estado" class="mensaje-estado" style="color: var(--blanco);"></p>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 MC TECH — Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script>
+    // 1. Cargar servicios desde MySQL
+    fetch('/api/servicios')
+      .then(r => r.json())
+      .then(servicios => {
+        const cont = document.getElementById('lista-servicios');
+        if (!servicios.length) {
+          cont.innerHTML = '<p>No hay servicios cargados.</p>';
+          return;
+        }
+        cont.innerHTML = servicios.map(s => `
+          <div class="card-servicio">
+            <div class="icono-caja"><i class="fa-solid ${s.icono || 'fa-cog'}"></i></div>
+            <h3>${s.nombre}</h3>
+            <p>${s.descripcion}</p>
+            <p class="precio">${s.consultar ? 'Consultar precio' : '$' + Number(s.precio).toLocaleString('es-AR')}</p>
+          </div>
+        `).join('');
+      })
+      .catch(err => {
+        document.getElementById('lista-servicios').innerHTML = '<p class="err">Error al cargar servicios.</p>';
+      });
+
+    // 2. Enviar formulario a MySQL
+    const form = document.getElementById('form-consulta-portada');
+    const estado = document.getElementById('estado');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      estado.textContent = 'Enviando...';
+      
+      const datos = {
+        nombre: document.getElementById('nombre').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        telefono: document.getElementById('telefono').value,
+        asunto: document.getElementById('asunto').value,
+        mensaje: document.getElementById('mensaje').value.trim()
+      };
+
+      try {
+        const res = await fetch('/api/consultas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos)
+        });
+        if (!res.ok) throw new Error('Error');
+        estado.textContent = '✅ ¡Mensaje enviado con éxito!';
+        form.reset();
+      } catch (err) {
+        estado.textContent = '❌ Error al enviar. Revisá tu conexión.';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Servicios | MC TECH</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><img src="img/logo.png" alt="MC TECH"><span>MC TECH</span></div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="nosotros.html">Nosotros</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </header>
+
+  <section>
+    <h2>Nuestros Servicios</h2>
+    <div id="lista-servicios" class="grid-servicios">
+      <p>Cargando servicios...</p>
+    </div>
+  </section>
+
+  <footer style="background:var(--azul-oscuro);color:var(--azul-claro);text-align:center;padding:1.5rem;margin-top:2rem;">
+    <p>© 2026 MC TECH — Todos los derechos reservados.</p>
+  </footer>
+
+  <script>
+    fetch('/api/servicios')
+      .then(r => r.json())
+      .then(servicios => {
+        const cont = document.getElementById('lista-servicios');
+        if (!servicios.length) {
+          cont.innerHTML = '<p>No hay servicios cargados.</p>';
+          return;
+        }
+        cont.innerHTML = servicios.map(s => `
+          <div class="card-servicio">
+            <h3><i class="fa-solid ${s.icono}" style="color:var(--azul-fuerte)"></i> ${s.nombre}</h3>
+            <p>${s.descripcion}</p>
+            <p class="precio">${s.consultar ? 'Consultar precio' : '$' + Number(s.precio).toLocaleString('es-AR')}</p>
+          </div>
+        `).join('');
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('lista-servicios').innerHTML =
+          '<p class="err">Error al cargar servicios. ¿Está el servidor corriendo?</p>';
+      });
+  </script>
+</body>
+</html>

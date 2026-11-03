@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto | MC TECH</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo"><img src="img/logo.png" alt="MC TECH"><span>MC TECH</span></div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="nosotros.html">Nosotros</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </header>
+
+  <section>
+    <h2>Dejanos tu consulta</h2>
+    <form id="form-consulta" novalidate>
+      <label>Nombre y apellido *</label>
+      <input type="text" id="nombre" required minlength="3">
+
+      <label>Email *</label>
+      <input type="email" id="email" required>
+
+      <label>Teléfono (opcional)</label>
+      <input type="tel" id="telefono">
+
+      <label>Asunto *</label>
+      <input type="text" id="asunto" required minlength="3">
+
+      <label>Mensaje * (mínimo 10 caracteres)</label>
+      <textarea id="mensaje" required minlength="10"></textarea>
+
+      <button type="submit" class="btn">Enviar consulta</button>
+      <p id="estado" class="mensaje-estado"></p>
+    </form>
+  </section>
+
+  <footer style="background:var(--azul-oscuro);color:var(--azul-claro);text-align:center;padding:1.5rem;margin-top:2rem;">
+    <p>© 2026 MC TECH — Todos los derechos reservados.</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('form-consulta');
+    const estado = document.getElementById('estado');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      estado.textContent = '';
+      estado.className = 'mensaje-estado';
+
+      const datos = {
+        nombre:   document.getElementById('nombre').value.trim(),
+        email:    document.getElementById('email').value.trim(),
+        telefono: document.getElementById('telefono').value.trim(),
+        asunto:   document.getElementById('asunto').value.trim(),
+        mensaje:  document.getElementById('mensaje').value.trim()
+      };
+
+      if (datos.nombre.length < 3)
+        return mostrar('El nombre debe tener al menos 3 caracteres', 'err');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.email))
+        return mostrar('Email inválido', 'err');
+      if (datos.asunto.length < 3)
+        return mostrar('El asunto debe tener al menos 3 caracteres', 'err');
+      if (datos.mensaje.length < 10)
+        return mostrar('El mensaje debe tener al menos 10 caracteres', 'err');
+
+      try {
+        const res = await fetch('/api/consultas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al enviar');
+        mostrar('✅ ¡Consulta enviada con éxito!', 'ok');
+        form.reset();
+      } catch (err) {
+        mostrar('❌ ' + err.message, 'err');
+      }
+    });
+
+    function mostrar(msg, tipo) {
+      estado.textContent = msg;
+      estado.className = 'mensaje-estado ' + tipo;
+    }
+  </script>
+</body>
+</html>
